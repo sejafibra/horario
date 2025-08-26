@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Escala de Horários - Horário App (Atualizado)</title>
+  <link rel="icon" href="https://raw.githubusercontent.com/sejafibra/agenda/refs/heads/main/faviconsf.ico" type="image/x-icon">
   <style>
     :root{
       --bg: #f5f7fb;
@@ -127,9 +128,161 @@
   let currentUser=null;let isAdmin=false;let state={month:new Date().getMonth(),year:new Date().getFullYear(),vacations:[],holidays:[],baseF:null,schedule:{}};
 
   function $(id){return document.getElementById(id)}
-  function isAdminUser(){return currentUser&&currentUser.email&&currentUser.email.toLowerCase()===ADMIN_EMAIL.toLowerCase();}
+  function isAdminUser() {
+  return currentUser && currentUser.email && 
+         (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() || 
+          NORMAL_EMAILS.includes(currentUser.email.toLowerCase()));
+}
 
-  function renderCalendar(){const m=parseInt($('selectMonth').value);const y=parseInt($('selectYear').value);if(!state.schedule)state.schedule={};const days=new Date(y,m+1,0).getDate();let html='<table class="calendar"><thead><tr><th>Nome</th>';for(let d=1;d<=days;d++){const dt=new Date(y,m,d);const weekday=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][dt.getUTCDay()];const thAttr=(dt.getUTCDay()===0)?' class="week-separator"':'';html+=`<th${thAttr}>${d}<br/><small>${weekday}</small></th>`;}html+='</tr></thead><tbody>';EMPLOYEES.forEach(emp=>{const rowClass=emp.city==='Caraguatatuba'?'caraguatatuba-row':'ubatuba-row';const cellClass=emp.city==='Caraguatatuba'?'caraguatatuba-cell':'ubatuba-cell';html+=`<tr class="${rowClass}"><td style="text-align:left"><strong>${emp.name}</strong><br/><small>${emp.city}</small></td>`;for(let d=1;d<=days;d++){const dt=new Date(Date.UTC(y,m,d));const dateStr=dt.toISOString().slice(0,10);let val=state.schedule[dateStr]&&state.schedule[dateStr][emp.name]?state.schedule[dateStr][emp.name]:'';let classes=cellClass;if(dt.getUTCDay()===0){classes='sunday';val='';}else if(dt.getUTCDay()===6){if(val==='F'){classes+=' saturday F';}else{classes+=' saturday';}}else if(val==='OFF')classes+=' off';else if(val==='A')classes+=' A';else if(val==='B')classes+=' B';else if(val==='C')classes+=' C';else if(val==='D')classes+=' D';else if(val==='F')classes+=' F';html+=`<td class="${classes}" data-date="${dateStr}" data-emp="${emp.name}" onclick="cellClicked(this)">${val||''}</td>`;}html+='</tr>';});html+='</tbody></table>';$('calendarWrap').innerHTML=html;if(isAdminUser())document.querySelectorAll('.admin-only').forEach(n=>n.classList.remove('admin-only'));}
+  // Funções de autenticação
+function initAuth() {
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      isAdmin = isAdminUser();
+      updateUIForAuth();
+      loadScheduleData();
+    } else {
+      currentUser = null;
+      isAdmin = false;
+      updateUIForAuth();
+    }
+  });
+}
+
+function updateUIForAuth() {
+  if (currentUser) {
+    $('authArea').classList.add('hidden');
+    $('appArea').classList.remove('hidden');
+    $('btnLogout').classList.remove('hidden');
+    $('userEmail').textContent = currentUser.email;
+    
+    // Preencher selects de mês/ano
+    populateMonthYearSelects();
+    renderCalendar();
+  } else {
+    $('authArea').classList.remove('hidden');
+    $('appArea').classList.add('hidden');
+    $('btnLogout').classList.add('hidden');
+    $('userEmail').textContent = '';
+  }
+}
+
+function populateMonthYearSelects() {
+  const monthSelect = $('selectMonth');
+  const yearSelect = $('selectYear');
+  
+  // Meses
+  const months = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  
+  monthSelect.innerHTML = '';
+  months.forEach((month, index) => {
+    const option = document.createElement('option');
+    option.value = index;
+    option.textContent = month;
+    option.selected = index === state.month;
+    monthSelect.appendChild(option);
+  });
+  
+  // Anos (2024-2026)
+  yearSelect.innerHTML = '';
+  for (let year = 2024; year <= 2026; year++) {
+    const option = document.createElement('option');
+    option.value = year;
+    option.textContent = year;
+    option.selected = year === state.year;
+    yearSelect.appendChild(option);
+  }
+  
+  // Adicionar event listeners
+  monthSelect.addEventListener('change', () => {
+    state.month = parseInt(monthSelect.value);
+    state.year = parseInt(yearSelect.value);
+    loadScheduleData();
+  });
+  
+  yearSelect.addEventListener('change', () => {
+    state.month = parseInt(monthSelect.value);
+    state.year = parseInt(yearSelect.value);
+    loadScheduleData();
+  });
+}
+
+// Event listeners para login/logout
+$('btnLogin').addEventListener('click', () => {
+  const email = $('email').value;
+  const password = $('password').value;
+  
+  if (!email || !password) {
+    showStatus('Preencha e-mail e senha', 'error');
+    return;
+  }
+  
+  auth.signInWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      showStatus('Login realizado com sucesso!', 'success');
+    })
+    .catch(error => {
+      showStatus('Erro no login: ' + error.message, 'error');
+    });
+});
+
+$('btnLogout').addEventListener('click', () => {
+  auth.signOut()
+    .then(() => {
+      showStatus('Logout realizado', 'info');
+    })
+    .catch(error => {
+      showStatus('Erro no logout: ' + error.message, 'error');
+    });
+});
+
+function showStatus(message, type) {
+  const status = $('status');
+  status.textContent = message;
+  status.style.color = type === 'error' ? '#d32f2f' : type === 'success' ? '#388e3c' : '#1976d2';
+  setTimeout(() => { status.textContent = ''; }, 5000);
+}
+
+function loadScheduleData() {
+  const monthKey = `${state.year}-${String(state.month + 1).padStart(2, '0')}`;
+  
+  db.ref(`schedules/${monthKey}`).once('value')
+    .then(snapshot => {
+      if (snapshot.exists()) {
+        state.schedule = snapshot.val();
+      } else {
+        state.schedule = {};
+      }
+      renderCalendar();
+    })
+    .catch(error => {
+      console.error('Erro ao carregar dados:', error);
+      showStatus('Erro ao carregar escala', 'error');
+    });
+}
+
+$('btnSaveSchedule').addEventListener('click', () => {
+  if (!isAdminUser()) {
+    showStatus('Apenas administradores podem salvar', 'error');
+    return;
+  }
+  
+  const monthKey = `${state.year}-${String(state.month + 1).padStart(2, '0')}`;
+  
+  db.ref(`schedules/${monthKey}`).set(state.schedule)
+    .then(() => {
+      showStatus('Escala salva com sucesso!', 'success');
+    })
+    .catch(error => {
+      showStatus('Erro ao salvar: ' + error.message, 'error');
+    });
+});
+
+function renderCalendar(){const m=parseInt($('selectMonth').value);const y=parseInt($('selectYear').value);if(!state.schedule)state.schedule={};const days=new Date(y,m+1,0).getDate();let html='<table class="calendar"><thead><tr><th>Nome</th>';for(let d=1;d<=days;d++){const dt=new Date(y,m,d);const weekday=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][dt.getUTCDay()];const thAttr=(dt.getUTCDay()===0)?' class="week-separator"':'';html+=`<th${thAttr}>${d}<br/><small>${weekday}</small></th>`;}html+='</tr></thead><tbody>';EMPLOYEES.forEach(emp=>{const rowClass=emp.city==='Caraguatatuba'?'caraguatatuba-row':'ubatuba-row';const cellClass=emp.city==='Caraguatatuba'?'caraguatatuba-cell':'ubatuba-cell';html+=`<tr class="${rowClass}"><td style="text-align:left"><strong>${emp.name}</strong><br/><small>${emp.city}</small></td>`;for(let d=1;d<=days;d++){const dt=new Date(Date.UTC(y,m,d));const dateStr=dt.toISOString().slice(0,10);let val=state.schedule[dateStr]&&state.schedule[dateStr][emp.name]?state.schedule[dateStr][emp.name]:'';let classes=cellClass;if(dt.getUTCDay()===0){classes='sunday';val='';}else if(dt.getUTCDay()===6){if(val==='F'){classes+=' saturday F';}else{classes+=' saturday';}}else if(val==='OFF')classes+=' off';else if(val==='A')classes+=' A';else if(val==='B')classes+=' B';else if(val==='C')classes+=' C';else if(val==='D')classes+=' D';else if(val==='F')classes+=' F';html+=`<td class="${classes}" data-date="${dateStr}" data-emp="${emp.name}" onclick="cellClicked(this)">${val||''}</td>`;}html+='</tr>';});html+='</tbody></table>';$('calendarWrap').innerHTML=html;if(isAdminUser())document.querySelectorAll('.admin-only').forEach(n=>n.classList.remove('admin-only'));}
 
   window.cellClicked=function(td){if(!currentUser)return alert('Faça login');if(!isAdminUser())return;const date=td.dataset.date;const emp=td.dataset.emp;const dateObj=new Date(date+'T00:00:00Z');if(dateObj.getUTCDay()===0){alert('Domingos não podem ser editados.');return;}const currentVal=td.innerText.trim();const newVal=prompt('Informe novo horário para '+emp+' em '+date+' (A,B,C,D,F,OFF) ou deixe vazio para limpar',currentVal);if(newVal===null)return;const val=newVal.trim().toUpperCase();if(!state.schedule[date])state.schedule[date]={};if(val===''){delete state.schedule[date][emp];if(Object.keys(state.schedule[date]).length===0)delete state.schedule[date];}else{state.schedule[date][emp]=val;applyShiftRules(date,emp,val);}renderCalendar();}
 
@@ -140,6 +293,11 @@
     if(cityEmployees[2])state.schedule[date][cityEmployees[2]]='B';
   } // C off: não muda nada
   }}
+
+// Inicializar autenticação quando o documento carregar
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+});
   </script>
 </body>
 </html>
