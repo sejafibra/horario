@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Escala de Horários - Horário App (Atualizado)</title>
+  <style>
+    :root{
+      --bg: #f5f7fb;
+      --card: #fff;
+      --accent: #0b74da;
+      --accent2: #ff7a00;
+      --caraguatatuba: #f8d7ff;
+      --ubatuba: #d7ebff;
+      --saturday-bg: #d32f2f;
+      --saturday-f-bg: #1976d2;
+      --sunday-bg: #616161;
+      --week-border: 2px solid #999;
+    }
+    
+    body{font-family: Segoe UI, Roboto, Arial;margin: 0;background: var(--bg);color: #222;}
+    header{background: linear-gradient(90deg, var(--accent), #0b5bb0);color: #fff;padding: 12px 20px;display: flex;align-items: center;justify-content: space-between;}
+    main{padding: 18px;}
+    .card{background: var(--card);border-radius: 6px;padding: 12px;box-shadow: 0 1px 4px rgba(0,0,0,0.08);margin-bottom: 12px;}
+    .row{display: flex;gap: 12px;}
+    .col{flex: 1;}
+    table.calendar{border-collapse: collapse;width: 100%;margin-top: 12px;}
+    table.calendar th, table.calendar td{border: 1px solid #cfd8e3;padding: 6px;text-align: center;font-size: 13px;}
+    table.calendar th{background: #eef4fb;}
+    .btn{display: inline-block;padding: 8px 10px;border-radius: 6px;border: none;background: var(--accent);color: #fff;cursor: pointer;}
+    .btn.secondary{background: #666;}
+    .small{font-size: 12px;}
+    .vac{background: linear-gradient(90deg, #fff1b8, #ffd79e);}
+    .off{background: #efefef;color: #888;}
+    .A{background: #e9f5ff;}
+    .B{background: #eafaf1;}
+    .C{background: #f0f6ff;}
+    .D{background: #ffecec;}
+    .F{background: #e6f0ff;}
+    .saturday{background: var(--saturday-bg) !important;color: white;font-weight: bold;}
+    .saturday.F{background: var(--saturday-f-bg) !important;color: white;font-weight: bold;}
+    .holiday{background: #ffe6e6;color: #8a0000;font-weight: bold;}
+    .admin-only{display: none;}
+    .topbar{display: flex;gap: 8px;align-items: center;}
+    input[type="date"], select, input[type="text"], input[type="email"], input[type="password"]{padding: 8px;border: 1px solid #c9d6e9;border-radius: 6px;}
+    .login-wrap{max-width: 360px;margin: 30px auto;}
+    .hidden{display: none;}
+    .sunday{background-color: var(--sunday-bg);color: white;}
+    .caraguatatuba-row {background-color: var(--caraguatatuba);}
+    .ubatuba-row {background-color: var(--ubatuba);}
+    .caraguatatuba-cell {background-color: var(--caraguatatuba);}
+    .ubatuba-cell {background-color: var(--ubatuba);}
+    .week-separator {border-right: var(--week-border);}
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>Escala de Horários</strong> — Admin / Usuário</div>
+    <div class="topbar">
+      <div id="userEmail" style="font-size:13px;opacity:0.9"></div>
+      <button id="btnLogout" class="btn secondary hidden">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="authArea" class="card">
+      <div id="loginBox">
+        <h3>Login</h3>
+        <p>Faça login com seu e-mail e senha (usuarios devem ser criados no Firebase Authentication).</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="email" type="email" placeholder="email" />
+          <input id="password" type="password" placeholder="senha" />
+          <button id="btnLogin" class="btn">Entrar</button>
+        </div>
+        <p class="small">Observações: crie as contas diretamente no Firebase Authentication. O sistema fará apenas validação de e-mail permitido.</p>
+      </div>
+      <div id="status" style="margin-top:8px;font-size:13px;color:#333"></div>
+    </div>
+
+    <div id="appArea" class="hidden">
+      <div class="card row">
+        <div class="col">
+          <label>Mês</label>
+          <select id="selectMonth"></select>
+        </div>
+        <div class="col">
+          <label>Ano</label>
+          <select id="selectYear"></select>
+        </div>
+        <div class="col" style="display:flex;align-items:end;gap:8px">
+          <button id="btnSaveSchedule" class="btn admin-only">Salvar Escala</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>Escala</h3>
+        </div>
+        <div id="calendarWrap"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+  const firebaseConfig = {apiKey:"AIzaSyCWVaqUCB1Hp54fxBhfpDPNGIr-77nvdEc",authDomain:"horario-8b72d.firebaseapp.com",projectId:"horario-8b72d",storageBucket:"horario-8b72d.firebasestorage.app",messagingSenderId:"601763187043",appId:"1:601763187043:web:5e3c3c37b4c3e463206b56",databaseURL:"https://horario-8b72d-default-rtdb.firebaseio.com/"};
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const ADMIN_EMAIL = 'bioranss@gmail.com';
+  const NORMAL_EMAILS = ['ana@sejafibra.net','alissia@sejafibra.net','juliana@sejafibra.net','eduarda@sejafibra.net','tais@sejafibra.net','isabela@sejafibra.net'];
+
+  const EMPLOYEES = [
+    {name:'ALÍSSIA', email:'alissia@sejafibra.net', city:'Caraguatatuba'},
+    {name:'JULIANA', email:'juliana@sejafibra.net', city:'Caraguatatuba'},
+    {name:'ISABELA', email:'isabela@sejafibra.net', city:'Caraguatatuba'},
+    {name:'ANA', email:'ana@sejafibra.net', city:'Ubatuba'},
+    {name:'TAIS', email:'tais@sejafibra.net', city:'Ubatuba'},
+    {name:'EDUARDA', email:'eduarda@sejafibra.net', city:'Ubatuba'}
+  ];
+  const ORDER = {Caraguatatuba:['ALÍSSIA','ISABELA','JULIANA'],Ubatuba:['ANA','TAIS','EDUARDA']};
+
+  let currentUser=null;let isAdmin=false;let state={month:new Date().getMonth(),year:new Date().getFullYear(),vacations:[],holidays:[],baseF:null,schedule:{}};
+
+  function $(id){return document.getElementById(id)}
+  function isAdminUser(){return currentUser&&currentUser.email&&currentUser.email.toLowerCase()===ADMIN_EMAIL.toLowerCase();}
+
+  function renderCalendar(){const m=parseInt($('selectMonth').value);const y=parseInt($('selectYear').value);if(!state.schedule)state.schedule={};const days=new Date(y,m+1,0).getDate();let html='<table class="calendar"><thead><tr><th>Nome</th>';for(let d=1;d<=days;d++){const dt=new Date(y,m,d);const weekday=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][dt.getUTCDay()];const thAttr=(dt.getUTCDay()===0)?' class="week-separator"':'';html+=`<th${thAttr}>${d}<br/><small>${weekday}</small></th>`;}html+='</tr></thead><tbody>';EMPLOYEES.forEach(emp=>{const rowClass=emp.city==='Caraguatatuba'?'caraguatatuba-row':'ubatuba-row';const cellClass=emp.city==='Caraguatatuba'?'caraguatatuba-cell':'ubatuba-cell';html+=`<tr class="${rowClass}"><td style="text-align:left"><strong>${emp.name}</strong><br/><small>${emp.city}</small></td>`;for(let d=1;d<=days;d++){const dt=new Date(Date.UTC(y,m,d));const dateStr=dt.toISOString().slice(0,10);let val=state.schedule[dateStr]&&state.schedule[dateStr][emp.name]?state.schedule[dateStr][emp.name]:'';let classes=cellClass;if(dt.getUTCDay()===0){classes='sunday';val='';}else if(dt.getUTCDay()===6){if(val==='F'){classes+=' saturday F';}else{classes+=' saturday';}}else if(val==='OFF')classes+=' off';else if(val==='A')classes+=' A';else if(val==='B')classes+=' B';else if(val==='C')classes+=' C';else if(val==='D')classes+=' D';else if(val==='F')classes+=' F';html+=`<td class="${classes}" data-date="${dateStr}" data-emp="${emp.name}" onclick="cellClicked(this)">${val||''}</td>`;}html+='</tr>';});html+='</tbody></table>';$('calendarWrap').innerHTML=html;if(isAdminUser())document.querySelectorAll('.admin-only').forEach(n=>n.classList.remove('admin-only'));}
+
+  window.cellClicked=function(td){if(!currentUser)return alert('Faça login');if(!isAdminUser())return;const date=td.dataset.date;const emp=td.dataset.emp;const dateObj=new Date(date+'T00:00:00Z');if(dateObj.getUTCDay()===0){alert('Domingos não podem ser editados.');return;}const currentVal=td.innerText.trim();const newVal=prompt('Informe novo horário para '+emp+' em '+date+' (A,B,C,D,F,OFF) ou deixe vazio para limpar',currentVal);if(newVal===null)return;const val=newVal.trim().toUpperCase();if(!state.schedule[date])state.schedule[date]={};if(val===''){delete state.schedule[date][emp];if(Object.keys(state.schedule[date]).length===0)delete state.schedule[date];}else{state.schedule[date][emp]=val;applyShiftRules(date,emp,val);}renderCalendar();}
+
+  function applyShiftRules(date,emp,val){const employee=EMPLOYEES.find(e=>e.name===emp);if(!employee)return;const city=employee.city;const cityEmployees=ORDER[city];if(val==='OFF'){const shifts=cityEmployees.map(n=>state.schedule[date][n]||'');const index=cityEmployees.indexOf(emp);if(index===0){ // A off
+    if(cityEmployees[1])state.schedule[date][cityEmployees[1]]='A';
+    if(cityEmployees[2])state.schedule[date][cityEmployees[2]]='B';
+  }else if(index===1){ // B off
+    if(cityEmployees[2])state.schedule[date][cityEmployees[2]]='B';
+  } // C off: não muda nada
+  }}
+  </script>
+</body>
+</html>
