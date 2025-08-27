@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Escala de Trabalho - Seja Fibra</title>
+<link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/sejafibra/menu/refs/heads/main/faviconsf.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -17,12 +18,15 @@
     --ok:#10b981;          /* emerald-500 */
     --danger:#ef4444;      /* red-500 */
     --card:#0b1220;        /* deep panel */
+    --magenta-light:#f8bbd0;     /* magenta claro-3 */
+    --cornflower-light:#bbdefb;  /* azul centáurea claro-3 */
+    --dark-gray:#2b2b2b;         /* cinza escuro-1 */
   }
   *{box-sizing:border-box}
   body{
     margin:0;padding:0;background:linear-gradient(180deg,#0b1220 0%, #0f172a 60%);
     color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    overflow-x: hidden;
+    overflow-x:hidden;
   }
   header{
     position:sticky;top:0;z-index:10;
@@ -46,137 +50,70 @@
     border-radius:14px;padding:12px;margin:12px 0
   }
   .toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:space-between}
-  .toolbar .left, .toolbar .right{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-  .calendar{
-    width:100%;overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.06);
-    max-height:70vh;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    /* REMOVIDO: table-layout: fixed; */
-    font-size: 0.8em;
-  }
-
-  th, td {
-    border: 1px solid #333;
-    padding: 4px;
-    text-align: center;
-    word-wrap: break-word;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  thead th{
-    position:sticky;top:0;background:#0c1324;z-index:5;
-    padding: 6px 4px;
-    font-weight: 600;
-    white-space: nowrap; /* Impede quebra de linha no cabeçalho */
-  }
-  
-  /* ESTILO ESPECÍFICO PARA A PRIMEIRA COLUNA */
-  tbody th {
-    position:sticky;left:0;background:#0c1324;text-align:left;font-weight:600;
-    border-right:1px solid rgba(255,255,255,.06);z-index:4;
-    min-width: 70px; /* Largura reduzida */
-    font-size: 0.75em; /* Fonte menor */
-    padding: 4px 6px; /* Padding ajustado */
-  }
-  
-  td.readonly{opacity:.7}
-  td.sat{background:rgba(245,158,11,.10)}
-  td.sun{background:rgba(239,68,68,.10)}
   .legend{display:flex;gap:8px;flex-wrap:wrap;font-size:0.8em;}
   .chip{padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.08);font-size:11px}
   .chip.ok{background:rgba(16,185,129,.12)}
   .chip.warn{background:rgba(245,158,11,.12)}
   .chip.err{background:rgba(239,68,68,.12)}
+
+  .calendar{
+    width:100%;overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.06);
+    max-height:70vh;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+  th, td { border: 1px solid #333; padding: 4px; text-align: center; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; }
+
+  thead th{
+    position:sticky;top:0;background:#0c1324;z-index:5;
+    padding:6px 4px;font-weight:600;white-space:nowrap;
+  }
+
+  /* Primeira coluna: ajuste automático + sticky */
+  tbody th {
+    position:sticky;left:0;background:#0c1324;text-align:left;font-weight:600;
+    border-right:1px solid rgba(255,255,255,.06);z-index:4;
+    width:auto; max-width:none; white-space:nowrap; padding:4px 8px;
+  }
+
+  /* Linhas por grupo */
+  tr.magenta-row th, tr.magenta-row td { background: var(--magenta-light); }
+  tr.blue-row   th, tr.blue-row   td { background: var(--cornflower-light); }
+
+  /* Domingo: coluna inteira cinza escuro */
+  th.sun, td.sun { background: var(--dark-gray) !important; color: white; }
+
+  /* Sábado dinâmico por valor */
+  td.sat-d, td.sat-off { background: var(--danger) !important; color: #fff !important; font-weight:700; }
+  td.sat-f            { background: var(--primary) !important; color: #fff !important; font-weight:700; }
+
+  /* Separação de semanas – bordas grossas: esquerda da segunda / direita do sábado */
+  th.mon-start, td.mon-start { border-left: 3px solid #fff; }
+  th.sat-end,  td.sat-end  { border-right: 3px solid #fff; }
+
+  /* Editor popup */
   .cell-editor{
     position:absolute;background:#0f1a30;border:1px solid rgba(255,255,255,.18);
-    border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.4);padding:5px;z-index:50;
-    font-size: 0.9em;
+    border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.4);padding:5px;z-index:50;font-size:0.9em;
   }
-  .cell-editor select{width:100px; font-size: 0.9em;}
-  .muted{color:var(--muted)}
+  .cell-editor select{width:110px;font-size:0.9em;}
   .hidden{display:none}
-  .note{font-size:11px;color:var(--muted);line-height:1.4;}
-  .sep{opacity:.2;margin:0 4px}
-  .center{display:flex;justify-content:center}
-  
-  /* Novos estilos para melhor responsividade */
-  .auth-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-  
-  .auth-container input {
-    min-width: 120px;
-    max-width: 160px;
-  }
-  
-  @media (max-width: 768px) {
-    .wrap {
-      padding: 8px;
-    }
-    
-    h1 {
-      font-size: 16px;
-    }
-    
-    .toolbar {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .toolbar .right {
-      align-self: flex-end;
-    }
-    
-    .legend {
-      margin-top: 6px;
-    }
-    
-    table {
-      font-size: 0.75em;
-    }
-    
-    th, td {
-      padding: 3px 2px;
-    }
-    
-    tbody th {
-      min-width: 60px; /* Mais estreito em mobile */
-      font-size: 0.7em; /* Fonte ainda menor */
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .auth-container {
-      flex-direction: column;
-      align-items: flex-end;
-    }
-    
-    .auth-container input {
-      max-width: 130px;
-    }
-    
-    .chip {
-      padding: 3px 6px;
-    }
-    
-    tbody th {
-      min-width: 50px; /* Mínimo possível */
-      font-size: 0.65em; /* Fonte mínima legível */
-      padding: 3px 4px;
-    }
-    
-    .btn-ghost, .btn-primary {
-      padding: 6px 8px;
-      font-size: 0.8em;
-    }
-  }
+  .muted{color:var(--muted)}
+/* Fonte preta nos nomes */
+tbody th {
+  color: black !important;
+}
+
+/* Fonte preta em todas as células por padrão */
+tbody td {
+  color: black;
+}
+
+/* Mantém exceções de sábado já existentes */
+td.sat-d, td.sat-off, td.sat-f {
+  color: white !important;
+}
+
 </style>
 </head>
 <body>
@@ -185,18 +122,18 @@
     <h1>Escala de Trabalho</h1>
     <span class="tag" id="envTag">Firebase Realtime</span>
     <div style="flex:1"></div>
-    <div id="authBox" class="auth-container">
+    <div id="authBox" class="auth-container" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <input id="email" type="email" placeholder="email" autocomplete="username">
       <input id="password" type="password" placeholder="senha" autocomplete="current-password">
       <button id="loginBtn" class="btn-primary">Entrar</button>
       <button id="logoutBtn" class="btn-danger hidden">Sair</button>
       <span id="whoami" class="tag hidden"></span>
+      <span id="roleBadge" class="tag">Somente leitura</span>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-
   <div class="panel toolbar">
     <div class="left">
       <button id="prevMonth" class="btn-ghost">◀ Anterior</button>
@@ -204,19 +141,18 @@
       <button id="nextMonth" class="btn-ghost">Próximo ▶</button>
       <span class="sep">|</span>
       <div class="legend">
-        <div class="chip ok">Seg-Sex: A/B/C</div>
+        <div class="chip ok">Seg–Sex: A/B/C</div>
         <div class="chip warn">Sáb: D (F alterna)</div>
         <div class="chip err">Dom: OFF</div>
       </div>
     </div>
     <div class="right">
       <button id="generateBtn" class="btn-primary hidden">Gerar próximo mês</button>
-      <span id="roleBadge" class="tag">Deslogado</span>
     </div>
   </div>
 
   <div class="panel">
-    <div class="note">Clique em uma célula para editar (somente admin). Valores: <b>A, B, C, D, F, OFF</b>.</div>
+    <div class="muted" style="font-size:12px">Clique em uma célula para editar (somente admin). Valores: <b>A, B, C, D, F, OFF</b>.</div>
     <div class="calendar">
       <table id="scheduleTable">
         <thead id="thead"></thead>
@@ -225,10 +161,7 @@
     </div>
   </div>
 
-  <div class="center muted note">
-    Feito com ♥ usando Firebase. | Admin: bioranss@gmail.com
-  </div>
-
+  <div class="muted" style="text-align:center;font-size:12px">Feito com ♥ usando Firebase. | Admin: bioranss@gmail.com</div>
 </main>
 
 <!-- Firebase SDKs -->
@@ -237,8 +170,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-/* ====================== CONFIGURAÇÃO FIREBASE ====================== */
-// Use exatamente o seu config:
+/* ====================== CONFIG FIREBASE ====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyCWVaqUCB1Hp54fxBhfpDPNGIr-77nvdEc",
   authDomain: "horario-8b72d.firebaseapp.com",
@@ -252,9 +184,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-/* ====================== CONSTANTES DE DOMÍNIO ====================== */
-
-// IDs internos (sem acento) -> Nome de exibição
+/* ====================== CONSTANTES / DADOS ====================== */
 const EMPLOYEES = {
   alissia: "Alíssia",
   juliana: "Juliana",
@@ -263,75 +193,41 @@ const EMPLOYEES = {
   tais: "Taís",
   eduarda: "Eduarda"
 };
-
-// Grupos de rotação para regras
 const GROUPS = {
-  G1: ["alissia","juliana","isabela"],     // Alíssia fixa A; Juliana/Isabela B<->C
-  G2: ["ana","tais","eduarda"]            // A/B/C entre si
+  G1: ["alissia","juliana","isabela"], // Alíssia fixa A; Juliana/Isabela alternam B/C
+  G2: ["ana","tais","eduarda"]         // A/B/C entre si
 };
-
-// Dias úteis / sábado / domingo
-const WEEKDAY = 1, SATURDAY = 6, SUNDAY = 0;
-
-// E-mails (permissão)
+const WEEKDAY=1, SATURDAY=6, SUNDAY=0;
 const ADMIN_EMAIL = "bioranss@gmail.com";
 
-/* ====================== ESTADO ====================== */
-
-let currentUser = null;
-let isAdmin = false;
-
-let viewYear, viewMonth; // JS month: 0-11
-let dataCache = {};      // dados lidos do Firebase para o mês corrente
+let currentUser=null, isAdmin=false;
+let viewYear, viewMonth;
+let dataCache = {};  // dados do mês corrente
 
 /* ====================== UTILS ====================== */
-
 const pad2 = n => String(n).padStart(2,'0');
-function monthKey(y,m){ return `${y}/${pad2(m+1)}`; }
 function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
-function getWeekday(y,m,d){ return new Date(y,m,d).getDay(); } // 0=Dom .. 6=Sab
-function isSaturday(y,m,d){ return getWeekday(y,m,d) === 6; }
-function isSunday(y,m,d){ return getWeekday(y,m,d) === 0; }
-function saturdayIndexInMonth(y,m,d){ // 0,1,2... para revezamento F
-  let idx=-1;
-  for(let day=1; day<=d; day++){
-    if(isSaturday(y,m,day)) idx++;
-  }
-  return idx;
-}
-// Ajuste de letras quando há OFF dentro de um grupo (regras fornecidas)
+function getWeekday(y,m,d){ return new Date(y,m,d).getDay(); } // 0=Dom..6=Sab
+function isSaturday(y,m,d){ return getWeekday(y,m,d)===6; }
+function isSunday(y,m,d){ return getWeekday(y,m,d)===0; }
+function saturdayIndexInMonth(y,m,d){ let idx=-1; for(let i=1;i<=d;i++){ if(isSaturday(y,m,i)) idx++; } return idx; }
+function monthKey(y,m){ return `${y}/${pad2(m+1)}`; }
+
+/* Regras de substituição quando há OFF em dias úteis no mesmo grupo */
 function applyOffShift(group, dayAssignments){
-  // group = array de ids (ex: ["alissia","juliana","isabela"])
-  // dayAssignments = { id: "A|B|C|D|F|OFF" }
-  // Só aplica para A/B/C dentro do mesmo grupo
   const letters = {};
-  for(const id of group){
-    letters[id] = dayAssignments[id] || "OFF";
-  }
-  // Quem possui A/B/C?
+  for(const id of group){ letters[id] = dayAssignments[id] || "OFF"; }
   const byLetter = {A:null, B:null, C:null};
   for(const id of group){
     const v = letters[id];
-    if(byLetter[v] === null && (v==="A"||v==="B"||v==="C")) byLetter[v] = id;
+    if((v==="A"||v==="B"||v==="C") && byLetter[v]===null) byLetter[v]=id;
   }
-  // Se A está OFF -> B->A, C->B
-  if(byLetter.A && letters[byLetter.A]==="OFF"){
-    if(byLetter.B) letters[byLetter.B] = "A";
-    if(byLetter.C) letters[byLetter.C] = "B";
-  }
-  // Se B está OFF -> C->B
-  if(byLetter.B && letters[byLetter.B]==="OFF"){
-    if(byLetter.C) letters[byLetter.C] = "B";
-  }
-  // Se C OFF -> sem efeito nos anteriores
-  // Persistir de volta
-  for(const id of group){
-    dayAssignments[id] = letters[id];
-  }
+  if(byLetter.A && letters[byLetter.A]==="OFF"){ if(byLetter.B) letters[byLetter.B]="A"; if(byLetter.C) letters[byLetter.C]="B"; }
+  if(byLetter.B && letters[byLetter.B]==="OFF"){ if(byLetter.C) letters[byLetter.C]="B"; }
+  for(const id of group){ dayAssignments[id]=letters[id]; }
 }
 
-/* ====================== AUTENTICAÇÃO ====================== */
-
+/* ====================== AUTH ====================== */
 const emailEl = document.getElementById('email');
 const passEl  = document.getElementById('password');
 const loginBtn = document.getElementById('loginBtn');
@@ -340,144 +236,122 @@ const whoami = document.getElementById('whoami');
 const roleBadge = document.getElementById('roleBadge');
 
 loginBtn.addEventListener('click', async () => {
-  try{
-    await auth.signInWithEmailAndPassword(emailEl.value.trim(), passEl.value.trim());
-  }catch(e){
-    alert("Falha no login: " + e.message);
-  }
+  try{ await auth.signInWithEmailAndPassword(emailEl.value.trim(), passEl.value.trim()); }
+  catch(e){ alert("Falha no login: " + e.message); }
 });
-logoutBtn.addEventListener('click', async () => {
-  await auth.signOut();
-});
+logoutBtn.addEventListener('click', async () => { await auth.signOut(); });
 
 auth.onAuthStateChanged(async (user)=>{
   currentUser = user;
-  if(user){
-    isAdmin = (user.email === ADMIN_EMAIL);
-    whoami.textContent = user.email;
-    whoami.classList.remove('hidden');
-    loginBtn.classList.add('hidden');
-    emailEl.classList.add('hidden');
-    passEl.classList.add('hidden');
-    logoutBtn.classList.remove('hidden');
-    roleBadge.textContent = isAdmin ? "Admin" : "Somente leitura";
-    document.getElementById('generateBtn').classList.toggle('hidden', !isAdmin);
-    // Carregar mês atual
-    const now = new Date();
-    setViewMonth(now.getFullYear(), now.getMonth());
-  }else{
-    isAdmin = false;
-    whoami.classList.add('hidden');
-    loginBtn.classList.remove('hidden');
-    emailEl.classList.remove('hidden');
-    passEl.classList.remove('hidden');
-    logoutBtn.classList.add('hidden');
-    roleBadge.textContent = "Deslogado";
-    clearTable();
-  }
+  isAdmin = !!user && user.email===ADMIN_EMAIL;
+  whoami.textContent = user ? user.email : "";
+  whoami.classList.toggle('hidden', !user);
+  loginBtn.classList.toggle('hidden', !!user);
+  logoutBtn.classList.toggle('hidden', !user);
+  emailEl.classList.toggle('hidden', !!user);
+  passEl.classList.toggle('hidden',  !!user);
+  roleBadge.textContent = isAdmin ? "Admin" : (user ? "Somente leitura" : "Somente leitura");
+  document.getElementById('generateBtn').classList.toggle('hidden', !isAdmin);
+  // Apenas re-render para aplicar permissões (não precisa recarregar do DB)
+  renderTable(viewYear, viewMonth, dataCache);
 });
 
-/* ====================== UI CALENDÁRIO ====================== */
-
+/* ====================== NAVEGAÇÃO DE MÊS ====================== */
 const thead = document.getElementById('thead');
 const tbody = document.getElementById('tbody');
 const monthTitle = document.getElementById('monthTitle');
 
-function clearTable(){
-  thead.innerHTML = "";
-  tbody.innerHTML = "";
-  dataCache = {};
-}
-
 function setViewMonth(y,m){
-  viewYear = y; viewMonth = m;
+  viewYear=y; viewMonth=m;
   monthTitle.textContent = new Date(y,m,1).toLocaleDateString('pt-BR',{month:'long', year:'numeric'});
   loadMonth(y,m);
 }
+document.getElementById('prevMonth').onclick = ()=>{ const d=new Date(viewYear,viewMonth,1); d.setMonth(d.getMonth()-1); setViewMonth(d.getFullYear(), d.getMonth()); };
+document.getElementById('nextMonth').onclick = ()=>{ const d=new Date(viewYear,viewMonth,1); d.setMonth(d.getMonth()+1); setViewMonth(d.getFullYear(), d.getMonth()); };
 
-document.getElementById('prevMonth').onclick = ()=>{
-  const d = new Date(viewYear, viewMonth, 1);
-  d.setMonth(d.getMonth()-1);
-  setViewMonth(d.getFullYear(), d.getMonth());
-};
-document.getElementById('nextMonth').onclick = ()=>{
-  const d = new Date(viewYear, viewMonth, 1);
-  d.setMonth(d.getMonth()+1);
-  setViewMonth(d.getFullYear(), d.getMonth());
-};
+function clearTable(){ thead.innerHTML=""; tbody.innerHTML=""; dataCache={}; }
 
 async function loadMonth(y,m){
   clearTable();
   const ref = db.ref(`schedules/${y}/${pad2(m+1)}`);
   const snap = await ref.get();
   dataCache = snap.exists() ? snap.val() : {};
-  renderTable(y,m, dataCache);
+  renderTable(y,m,dataCache);
 }
 
 /* ====================== RENDERIZAÇÃO ====================== */
-
 function renderTable(y,m, monthData){
-  // Cabeçalho: 1..N
+  if(y==null||m==null){ return; }
   const days = daysInMonth(y,m);
-  let th1 = '<tr><th></th>'; // ALTERADO: texto vazio no cabeçalho
+
+  // Cabeçalho
+  let h = '<tr><th class="mon-start"></th>';
   for(let d=1; d<=days; d++){
     const dow = getWeekday(y,m,d);
     const label = `${pad2(d)}<br><span style="font-size:0.7em">${['DOM','SEG','TER','QUA','QUI','SEX','SAB'][dow]}</span>`;
-    th1 += `<th>${label}</th>`;
+    let thCls = "";
+    if(dow===SUNDAY) thCls="sun";
+    if(dow===1) thCls = (thCls?thCls+" ":"") + "mon-start";
+    if(dow===6) thCls = (thCls?thCls+" ":"") + "sat-end";
+    h += `<th class="${thCls}">${label}</th>`;
   }
-  th1 += '</tr>';
-  thead.innerHTML = th1;
+  h += '</tr>';
+  thead.innerHTML = h;
 
   // Linhas
   const ids = Object.keys(EMPLOYEES);
   const rows = [];
   for(const id of ids){
-    let row = `<tr><th>${EMPLOYEES[id]}</th>`;
+    let rowClass = ["alissia","juliana","isabela"].includes(id) ? "magenta-row" : "blue-row";
+    let row = `<tr class="${rowClass}"><th class="mon-start">${EMPLOYEES[id]}</th>`;
     for(let d=1; d<=days; d++){
       const dow = getWeekday(y,m,d);
       const dayStr = pad2(d);
       const val = monthData?.[dayStr]?.[id] ?? "";
-      const cls = ['','sun','','','','','sat'][dow];
-      const ro = isAdmin ? "" : "readonly";
-      row += `<td class="${cls} ${isAdmin?'':'readonly'}" 
-                 data-id="${id}" data-day="${dayStr}" data-dow="${dow}">
-                 ${val}
-              </td>`;
+      let cls = "";
+      if(dow===SUNDAY) cls = "sun";
+      if(dow===SATURDAY){
+        if(val==="D" || val==="OFF") cls = "sat-d";
+        else if(val==="F") cls = "sat-f";
+      }
+      if(dow===1) cls = (cls?cls+" ":"") + "mon-start";
+      if(dow===6) cls = (cls?cls+" ":"") + "sat-end";
+      row += `<td class="${cls}" data-id="${id}" data-day="${dayStr}" data-dow="${dow}">${val}</td>`;
     }
     row += '</tr>';
     rows.push(row);
   }
   tbody.innerHTML = rows.join('');
 
-  if(isAdmin) enableCellEditing();
+  if(isAdmin) enableCellEditing(); else disableCellEditing();
 }
 
 /* ====================== EDIÇÃO DE CÉLULAS (ADMIN) ====================== */
-
 let editorEl = null;
 function closeEditor(){ if(editorEl){ editorEl.remove(); editorEl=null; } }
-
-function enableCellEditing(){
+function disableCellEditing(){
   tbody.querySelectorAll('td').forEach(td=>{
-    td.addEventListener('click', (ev)=>{
-      if(td.classList.contains('readonly')) return;
+    td.replaceWith(td.cloneNode(true)); // remove listeners
+  });
+}
+function enableCellEditing(){
+  disableCellEditing();
+  tbody.querySelectorAll('td').forEach(td=>{
+    td.addEventListener('click', ()=>{
+      // popup
       closeEditor();
-      // Posição
       const r = td.getBoundingClientRect();
       editorEl = document.createElement('div');
       editorEl.className = 'cell-editor';
       editorEl.style.top = (window.scrollY + r.top + r.height + 4)+'px';
       editorEl.style.left = (window.scrollX + r.left)+'px';
       const dow = Number(td.dataset.dow);
-      // Opções
       let opts = ['A','B','C','OFF'];
-      if(dow === SATURDAY) opts = ['D','F','OFF'];
-      if(dow === SUNDAY)  opts = ['OFF'];
+      if(dow===SATURDAY) opts = ['D','F','OFF'];
+      if(dow===SUNDAY)  opts = ['OFF'];
       const current = td.textContent.trim();
       editorEl.innerHTML = `
-        <select id="opt">
-          ${opts.map(o=>`<option value="${o}" ${o===current?'selected':''}>${o}</option>`).join('')}
-        </select>
+        <select id="opt">${opts.map(o=>`<option value="${o}" ${o===current?'selected':''}>${o}</option>`).join('')}</select>
         <button id="save" class="btn-primary" style="margin-left:6px">Salvar</button>
         <button id="cancel" class="btn-ghost" style="margin-left:6px">Cancelar</button>
       `;
@@ -490,7 +364,6 @@ function enableCellEditing(){
       };
     });
   });
-
   document.addEventListener('scroll', closeEditor, {passive:true});
   window.addEventListener('resize', closeEditor);
 }
@@ -500,28 +373,24 @@ async function saveCell(td, value){
   const day = td.dataset.day;
   const dow = Number(td.dataset.dow);
 
-  // Atualizar cache local (e aplicar regra de OFF por grupo)
   dataCache[day] = dataCache[day] || {};
   dataCache[day][id] = value;
 
-  // Aplicar realocação OFF dentro do grupo correto quando M-F
-  if(dow !== SATURDAY && dow !== SUNDAY){
+  // Ajuste de OFF em grupos apenas Seg–Sex
+  if(dow!==SATURDAY && dow!==SUNDAY){
     for(const group of [GROUPS.G1, GROUPS.G2]){
-      if(group.includes(id)){
-        applyOffShift(group, dataCache[day]);
-      }
+      if(group.includes(id)) applyOffShift(group, dataCache[day]);
     }
   }
 
-  // Persistir no Firebase
+  // Persistência
   await db.ref(`schedules/${viewYear}/${pad2(viewMonth+1)}/${day}`).set(dataCache[day]);
 
-  // Re-render somente a linha
+  // Re-render
   renderTable(viewYear, viewMonth, dataCache);
 }
 
-/* ====================== GERADOR AUTOMÁTICO DO PRÓXIMO MÊS (ADMIN) ====================== */
-
+/* ====================== GERADOR DE MÊS (ADMIN) ====================== */
 document.getElementById('generateBtn').addEventListener('click', async ()=>{
   if(!isAdmin) return;
   const base = new Date(viewYear, viewMonth, 1);
@@ -531,12 +400,12 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
   setViewMonth(next.getFullYear(), next.getMonth());
 });
 
-// Regra: 
-// - SEG-SEX:
-//   G1: Alíssia=A; Juliana/Isabela alternam B/C por *semana*
-//   G2: Ana/Taís/Eduarda rodam A/B/C por *semana*
-// - SÁBADO: todos D; F alterna por sábado entre Isabela e Eduarda
-// - DOMINGO: todos OFF
+function weekIndexFor(y,m,day){
+  const first = new Date(y,m,1);
+  const offset = (first.getDay()+6)%7; // 0=Seg
+  return Math.floor((offset + (day-1)) / 7);
+}
+
 async function generateMonth(y,m){
   const days = daysInMonth(y,m);
   const monthRef = db.ref(`schedules/${y}/${pad2(m+1)}`);
@@ -545,68 +414,45 @@ async function generateMonth(y,m){
     const overwrite = confirm("Este mês já existe. Deseja sobrescrever?");
     if(!overwrite) return;
   }
-
   const payload = {};
-  // Base de rotação semanal
-  // Semana índice: considera segunda-feira como início (ajustando JS que começa em domingo)
-  function weekIndexFor(day){
-    const date = new Date(y,m,day);
-    // Índice da semana dentro do mês, baseado em seg como início
-    const first = new Date(y,m,1);
-    const offset = (first.getDay()+6)%7; // 0=Seg
-    return Math.floor((offset + (day-1)) / 7);
-  }
-
   for(let d=1; d<=days; d++){
     const dow = getWeekday(y,m,d);
     const key = pad2(d);
     payload[key] = {};
 
-    if(dow === SUNDAY){
-      // Domingo OFF para todos
+    if(dow===SUNDAY){
       for(const id of Object.keys(EMPLOYEES)) payload[key][id] = "OFF";
       continue;
     }
-
-    if(dow === SATURDAY){
-      // Sábado: todos D, com F alternando entre Isabela e Eduarda
+    if(dow===SATURDAY){
       for(const id of Object.keys(EMPLOYEES)) payload[key][id] = "D";
-      const satIdx = saturdayIndexInMonth(y,m,d); // 0,1,2,...
-      if(satIdx % 2 === 0){
-        payload[key]["isabela"] = "F";
-      }else{
-        payload[key]["eduarda"] = "F";
-      }
+      const satIdx = saturdayIndexInMonth(y,m,d);
+      if(satIdx % 2 === 0) payload[key]["isabela"] = "F";
+      else                 payload[key]["eduarda"] = "F";
       continue;
     }
 
-    // SEG-SEX
-    const widx = weekIndexFor(d);
-
+    // Seg–Sex
+    const widx = weekIndexFor(y,m,d);
     // Grupo 1
     payload[key]["alissia"] = "A"; // fixa
-    const jVal = (widx % 2 === 0) ? "B" : "C";
-    const iVal = (widx % 2 === 0) ? "C" : "B";
-    payload[key]["juliana"] = jVal;
-    payload[key]["isabela"] = iVal;
-
-    // Grupo 2 - rotação A/B/C
-    const cycle = ["A","B","C"];
-    const g2 = GROUPS.G2;
-    // deslocamento semanal
-    const off = widx % 3;
+    payload[key]["juliana"] = (widx%2===0) ? "B" : "C";
+    payload[key]["isabela"] = (widx%2===0) ? "C" : "B";
+    // Grupo 2 (rotação)
+    const cycle=["A","B","C"], off=widx%3, g2=GROUPS.G2;
     payload[key][g2[0]] = cycle[(0+off)%3];
     payload[key][g2[1]] = cycle[(1+off)%3];
     payload[key][g2[2]] = cycle[(2+off)%3];
   }
-
   await monthRef.set(payload);
 }
 
-/* ====================== BOOTSTRAP INICIAL ====================== */
-// Dica: para iniciar já em Setembro/2025 como no seu exemplo, descomente abaixo:
-// setViewMonth(2025, 8); // 8 = Setembro
-
+/* ====================== BOOTSTRAP ====================== */
+/* Carrega a tabela mesmo deslogado (somente leitura) */
+(function init(){
+  const now = new Date();
+  setViewMonth(now.getFullYear(), now.getMonth());
+})();
 </script>
 </body>
 </html>
