@@ -451,7 +451,23 @@ async function generateMonth(y,m){
 /* Carrega a tabela mesmo deslogado (somente leitura) */
 (function init(){
   const now = new Date();
-  setViewMonth(now.getFullYear(), now.getMonth());
+  let y = now.getFullYear();
+  let m = now.getMonth();
+  const d = now.getDate();
+
+  // total de dias no mês atual
+  const daysInThisMonth = daysInMonth(y, m);
+
+  // se faltam menos de 5 dias para o próximo mês
+  if (daysInThisMonth - d < 5) {
+    m++;
+    if (m > 11) { // passou de dezembro → janeiro do próximo ano
+      m = 0;
+      y++;
+    }
+  }
+
+  setViewMonth(y, m);
 })();
 </script>
 </body>
