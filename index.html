@@ -21,6 +21,7 @@
     --magenta-light:#f8bbd0;     /* magenta claro-3 */
     --cornflower-light:#bbdefb;  /* azul centáurea claro-3 */
     --dark-gray:#2b2b2b;         /* cinza escuro-1 */
+    --vacation:#8b5cf6;          /* roxo para férias */
   }
   *{box-sizing:border-box}
   body{
@@ -55,6 +56,7 @@
   .chip.ok{background:rgba(16,185,129,.12)}
   .chip.warn{background:rgba(245,158,11,.12)}
   .chip.err{background:rgba(239,68,68,.12)}
+  .chip.vacation{background:rgba(139,92,246,.12)}
 
   .calendar{
     width:100%;overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.06);
@@ -87,6 +89,9 @@
   td.sat-d, td.sat-off { background: var(--danger) !important; color: #fff !important; font-weight:700; }
   td.sat-f            { background: var(--primary) !important; color: #fff !important; font-weight:700; }
 
+  /* Férias - cor roxa */
+  td.vacation { background: var(--vacation) !important; color: #fff !important; font-weight:700; }
+
   /* Separação de semanas – bordas grossas: esquerda da segunda / direita do sábado */
   th.mon-start, td.mon-start { border-left: 3px solid #fff; }
   th.sat-end,  td.sat-end  { border-right: 3px solid #fff; }
@@ -99,21 +104,35 @@
   .cell-editor select{width:110px;font-size:0.9em;}
   .hidden{display:none}
   .muted{color:var(--muted)}
-/* Fonte preta nos nomes */
-tbody th {
-  color: black !important;
-}
+  
+  /* Fonte preta nos nomes */
+  tbody th {
+    color: black !important;
+  }
 
-/* Fonte preta em todas as células por padrão */
-tbody td {
-  color: black;
-}
+  /* Fonte preta em todas as células por padrão */
+  tbody td {
+    color: black;
+  }
 
-/* Mantém exceções de sábado já existentes */
-td.sat-d, td.sat-off, td.sat-f {
-  color: white !important;
-}
+  /* Mantém exceções de sábado já existentes */
+  td.sat-d, td.sat-off, td.sat-f, td.vacation {
+    color: white !important;
+  }
 
+  /* Novo layout para os botões de navegação */
+  .month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .month-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
@@ -135,16 +154,16 @@ td.sat-d, td.sat-off, td.sat-f {
 
 <main class="wrap">
   <div class="panel toolbar">
-    <div class="left">
+    <div class="month-navigation">
       <button id="prevMonth" class="btn-ghost">◀ Anterior</button>
-      <div class="chip"><strong id="monthTitle">Mês/Ano</strong></div>
+      <div class="month-title" id="monthTitle">Mês/Ano</div>
       <button id="nextMonth" class="btn-ghost">Próximo ▶</button>
-      <span class="sep">|</span>
-      <div class="legend">
-        <div class="chip ok">Seg–Sex: A/B/C</div>
-        <div class="chip warn">Sáb: D (F alterna)</div>
-        <div class="chip err">Dom: OFF</div>
-      </div>
+    </div>
+    <div class="legend">
+      <div class="chip ok">Seg–Sex: A/B/C</div>
+      <div class="chip warn">Sáb: D (F alterna)</div>
+      <div class="chip err">Dom: OFF</div>
+      <div class="chip vacation">*** = Férias</div>
     </div>
     <div class="right">
       <button id="generateBtn" class="btn-primary hidden">Gerar próximo mês</button>
@@ -152,7 +171,7 @@ td.sat-d, td.sat-off, td.sat-f {
   </div>
 
   <div class="panel">
-    <div class="muted" style="font-size:12px">Clique em uma célula para editar (somente admin). Valores: <b>A, B, C, D, F, OFF</b>.</div>
+    <div class="muted" style="font-size:12px">Clique em uma célula para editar (somente admin). Valores: <b>A, B, C, D, F, OFF, ***</b>.</div>
     <div class="calendar">
       <table id="scheduleTable">
         <thead id="thead"></thead>
@@ -161,7 +180,7 @@ td.sat-d, td.sat-off, td.sat-f {
     </div>
   </div>
 
-  <div class="muted" style="text-align:center;font-size:12px">A = 8h às 12h; 13h às 17h | B = 8h às 13h; 14h às 17h | C = 8h às 12h30; 13h30 às 17h | D = 8h às 12h | F = 14h às 18h</div>
+  <div class="muted" style="text-align:center;font-size:12px">A = 8h às 12h; 13h às 17h | B = 8h às 13h; 14h às 17h | C = 8h às 12h30; 13h30 às 17h | D = 8h às 12h | F = 14h às 18h | *** = Férias</div>
 </main>
 
 <!-- Firebase SDKs -->
@@ -193,10 +212,16 @@ const EMPLOYEES = {
   tais: "Taís",
   eduarda: "Eduarda"
 };
+
+// Separar por cidades
+const CARAGUA = ["alissia","juliana","isabela"];
+const UBATUBA = ["ana","tais","eduarda"];
+
 const GROUPS = {
-  G1: ["alissia","juliana","isabela"], // Alíssia fixa A; Juliana/Isabela alternam B/C
-  G2: ["ana","tais","eduarda"]         // A/B/C entre si
+  G1: CARAGUA,
+  G2: UBATUBA
 };
+
 const WEEKDAY=1, SATURDAY=6, SUNDAY=0;
 const ADMIN_EMAIL = "bioranss@gmail.com";
 
@@ -302,7 +327,7 @@ function renderTable(y,m, monthData){
   const ids = Object.keys(EMPLOYEES);
   const rows = [];
   for(const id of ids){
-    let rowClass = ["alissia","juliana","isabela"].includes(id) ? "magenta-row" : "blue-row";
+    let rowClass = CARAGUA.includes(id) ? "magenta-row" : "blue-row";
     let row = `<tr class="${rowClass}"><th class="mon-start">${EMPLOYEES[id]}</th>`;
     for(let d=1; d<=days; d++){
       const dow = getWeekday(y,m,d);
@@ -313,6 +338,9 @@ function renderTable(y,m, monthData){
       if(dow===SATURDAY){
         if(val==="D" || val==="OFF") cls = "sat-d";
         else if(val==="F") cls = "sat-f";
+        else if(val==="***") cls = "vacation";
+      } else {
+        if(val==="***") cls = "vacation";
       }
       if(dow===1) cls = (cls?cls+" ":"") + "mon-start";
       if(dow===6) cls = (cls?cls+" ":"") + "sat-end";
@@ -346,9 +374,9 @@ function enableCellEditing(){
       editorEl.style.top = (window.scrollY + r.top + r.height + 4)+'px';
       editorEl.style.left = (window.scrollX + r.left)+'px';
       const dow = Number(td.dataset.dow);
-      let opts = ['A','B','C','OFF'];
-      if(dow===SATURDAY) opts = ['D','F','OFF'];
-      if(dow===SUNDAY)  opts = ['OFF'];
+      let opts = ['A','B','C','OFF','***'];
+      if(dow===SATURDAY) opts = ['D','F','OFF','***'];
+      if(dow===SUNDAY)  opts = ['OFF','***'];
       const current = td.textContent.trim();
       editorEl.innerHTML = `
         <select id="opt">${opts.map(o=>`<option value="${o}" ${o===current?'selected':''}>${o}</option>`).join('')}</select>
@@ -376,8 +404,8 @@ async function saveCell(td, value){
   dataCache[day] = dataCache[day] || {};
   dataCache[day][id] = value;
 
-  // Ajuste de OFF em grupos apenas Seg–Sex
-  if(dow!==SATURDAY && dow!==SUNDAY){
+  // Ajuste de OFF em grupos apenas Seg–Sex (não aplica para férias "***")
+  if(dow!==SATURDAY && dow!==SUNDAY && value !== "***"){
     for(const group of [GROUPS.G1, GROUPS.G2]){
       if(group.includes(id)) applyOffShift(group, dataCache[day]);
     }
@@ -406,6 +434,72 @@ function weekIndexFor(y,m,day){
   return Math.floor((offset + (day-1)) / 7);
 }
 
+// Função para obter o último horário de um funcionário no mês anterior
+async function getLastSchedule(y, m, employeeId) {
+  // Ajustar para o mês anterior
+  const prevMonth = new Date(y, m, 1);
+  prevMonth.setMonth(prevMonth.getMonth() - 1);
+  
+  const prevY = prevMonth.getFullYear();
+  const prevM = prevMonth.getMonth();
+  
+  const ref = db.ref(`schedules/${prevY}/${pad2(prevM+1)}`);
+  const snap = await ref.get();
+  
+  if (!snap.exists()) return null;
+  
+  const monthData = snap.val();
+  const days = daysInMonth(prevY, prevM);
+  
+  // Procurar do último dia para trás
+  for (let d = days; d >= 1; d--) {
+    const dayStr = pad2(d);
+    const dow = getWeekday(prevY, prevM, d);
+    
+    // Ignorar fins de semana
+    if (dow === SUNDAY || dow === SATURDAY) continue;
+    
+    if (monthData[dayStr] && monthData[dayStr][employeeId] && monthData[dayStr][employeeId] !== "***") {
+      return monthData[dayStr][employeeId];
+    }
+  }
+  
+  return null;
+}
+
+// Função para obter quem fez o último horário F no mês anterior
+async function getLastFSaturday(y, m) {
+  const prevMonth = new Date(y, m, 1);
+  prevMonth.setMonth(prevMonth.getMonth() - 1);
+  
+  const prevY = prevMonth.getFullYear();
+  const prevM = prevMonth.getMonth();
+  
+  const ref = db.ref(`schedules/${prevY}/${pad2(prevM+1)}`);
+  const snap = await ref.get();
+  
+  if (!snap.exists()) return null;
+  
+  const monthData = snap.val();
+  const days = daysInMonth(prevY, prevM);
+  
+  // Procurar do último sábado para trás
+  for (let d = days; d >= 1; d--) {
+    const dayStr = pad2(d);
+    const dow = getWeekday(prevY, prevM, d);
+    
+    if (dow === SATURDAY && monthData[dayStr]) {
+      for (const id of Object.keys(monthData[dayStr])) {
+        if (monthData[dayStr][id] === "F") {
+          return id;
+        }
+      }
+    }
+  }
+  
+  return null;
+}
+
 async function generateMonth(y,m){
   const days = daysInMonth(y,m);
   const monthRef = db.ref(`schedules/${y}/${pad2(m+1)}`);
@@ -414,7 +508,51 @@ async function generateMonth(y,m){
     const overwrite = confirm("Este mês já existe. Deseja sobrescrever?");
     if(!overwrite) return;
   }
+  
+  // Obter os últimos horários do mês anterior
+  const lastCaraguaSchedule = {
+    juliana: await getLastSchedule(y, m, "juliana"),
+    isabela: await getLastSchedule(y, m, "isabela")
+  };
+  
+  const lastUbatubaSchedule = {
+    ana: await getLastSchedule(y, m, "ana"),
+    tais: await getLastSchedule(y, m, "tais"),
+    eduarda: await getLastSchedule(y, m, "eduarda")
+  };
+  
+  // Obter quem fez o último horário F
+  const lastFSaturday = await getLastFSaturday(y, m);
+  
   const payload = {};
+  
+  // Determinar rotação inicial baseada no último mês
+  let caraguaStart = 0; // 0 = Juliana B, Isabela C | 1 = Juliana C, Isabela B
+  if (lastCaraguaSchedule.juliana === "B" && lastCaraguaSchedule.isabela === "C") {
+    caraguaStart = 1; // Inverter
+  } else if (lastCaraguaSchedule.juliana === "C" && lastCaraguaSchedule.isabela === "B") {
+    caraguaStart = 0; // Manter
+  }
+  // Se não encontrou dados, usar padrão (0)
+  
+  // Determinar rotação inicial de Ubatuba
+  let ubatubaStart = 0;
+  const ubatubaCycle = ["A", "B", "C"];
+  if (lastUbatubaSchedule.ana) {
+    const lastIndex = ubatubaCycle.indexOf(lastUbatubaSchedule.ana);
+    if (lastIndex !== -1) {
+      ubatubaStart = (lastIndex + 1) % 3;
+    }
+  }
+  
+  // Determinar início da rotação de sábados F
+  let satFStart = 0; // 0 = Isabela, 1 = Eduarda
+  if (lastFSaturday === "isabela") {
+    satFStart = 1; // Próximo será Eduarda
+  } else if (lastFSaturday === "eduarda") {
+    satFStart = 0; // Próximo será Isabela
+  }
+  
   for(let d=1; d<=days; d++){
     const dow = getWeekday(y,m,d);
     const key = pad2(d);
@@ -424,26 +562,50 @@ async function generateMonth(y,m){
       for(const id of Object.keys(EMPLOYEES)) payload[key][id] = "OFF";
       continue;
     }
+    
     if(dow===SATURDAY){
       for(const id of Object.keys(EMPLOYEES)) payload[key][id] = "D";
+      
       const satIdx = saturdayIndexInMonth(y,m,d);
-      if(satIdx % 2 === 0) payload[key]["isabela"] = "F";
-      else                 payload[key]["eduarda"] = "F";
+      
+      // Alternar quem faz F, começando pela posição determinada
+      if (satIdx % 2 === 0) {
+        if (satFStart === 0) {
+          payload[key]["isabela"] = "F";
+        } else {
+          payload[key]["eduarda"] = "F";
+        }
+      } else {
+        if (satFStart === 0) {
+          payload[key]["eduarda"] = "F";
+        } else {
+          payload[key]["isabela"] = "F";
+        }
+      }
       continue;
     }
 
     // Seg–Sex
     const widx = weekIndexFor(y,m,d);
-    // Grupo 1
-    payload[key]["alissia"] = "A"; // fixa
-    payload[key]["juliana"] = (widx%2===0) ? "B" : "C";
-    payload[key]["isabela"] = (widx%2===0) ? "C" : "B";
-    // Grupo 2 (rotação)
-    const cycle=["A","B","C"], off=widx%3, g2=GROUPS.G2;
-    payload[key][g2[0]] = cycle[(0+off)%3];
-    payload[key][g2[1]] = cycle[(1+off)%3];
-    payload[key][g2[2]] = cycle[(2+off)%3];
+    
+    // Caraguá - Alíssia sempre A, Juliana e Isabela alternam por semana
+    payload[key]["alissia"] = "A";
+    
+    if ((widx + caraguaStart) % 2 === 0) {
+      payload[key]["juliana"] = "B";
+      payload[key]["isabela"] = "C";
+    } else {
+      payload[key]["juliana"] = "C";
+      payload[key]["isabela"] = "B";
+    }
+    
+    // Ubatuba - rotação A->B->C por semana
+    const ubatubaOffset = (widx + ubatubaStart) % 3;
+    payload[key]["ana"] = ubatubaCycle[ubatubaOffset];
+    payload[key]["tais"] = ubatubaCycle[(ubatubaOffset + 1) % 3];
+    payload[key]["eduarda"] = ubatubaCycle[(ubatubaOffset + 2) % 3];
   }
+  
   await monthRef.set(payload);
 }
 
