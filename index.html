@@ -9,72 +9,76 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0f172a;          /* slate-900 */
-    --panel:#111827;       /* gray-900 */
-    --muted:#94a3b8;       /* slate-400 */
-    --text:#e5e7eb;        /* gray-200 */
+    --bg:#f8fafc;          /* slate-50 */
+    --panel:#ffffff;       /* white */
+    --muted:#64748b;       /* slate-500 */
+    --text:#1e293b;        /* slate-800 */
     --primary:#3b82f6;     /* blue-500 */
     --accent:#f59e0b;      /* amber-500 */
     --ok:#10b981;          /* emerald-500 */
     --danger:#ef4444;      /* red-500 */
-    --card:#0b1220;        /* deep panel */
-    --magenta-light:#f8bbd0;     /* magenta claro-3 */
-    --cornflower-light:#bbdefb;  /* azul centáurea claro-3 */
-    --dark-gray:#2b2b2b;         /* cinza escuro-1 */
+    --card:#f1f5f9;        /* slate-100 */
+    --magenta-light:#fdf2f8;     /* rosa claro */
+    --cornflower-light:#f0f9ff;  /* azul claro */
+    --light-gray:#e2e8f0;        /* cinza claro */
     --vacation:#8b5cf6;          /* roxo para férias */
+    --border:#cbd5e1;            /* slate-300 */
   }
   *{box-sizing:border-box}
   body{
-    margin:0;padding:0;background:linear-gradient(180deg,#0b1220 0%, #0f172a 60%);
+    margin:0;padding:0;background:var(--bg);
     color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
     overflow-x:hidden;
   }
   header{
     position:sticky;top:0;z-index:10;
-    background:rgba(11,18,32,.85);backdrop-filter: blur(8px);
-    border-bottom:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.95);backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   .wrap{max-width:100%;margin:0 auto;padding:12px;}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   h1{font-size:18px;margin:0 8px 0 0;font-weight:700;letter-spacing:.2px}
-  .tag{font-size:11px;padding:3px 6px;border-radius:999px;background:#0f1a30;color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+  .tag{font-size:11px;padding:3px 6px;border-radius:999px;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
   input,select,button{
-    border:1px solid rgba(255,255,255,.08);background:#0f1a30;color:var(--text);
+    border:1px solid var(--border);background:white;color:var(--text);
     padding:8px 10px;border-radius:10px;font:inherit;font-size:0.9em;
   }
   button{cursor:pointer}
-  .btn-primary{background:var(--primary);border-color:transparent;font-weight:600}
-  .btn-ghost{background:transparent;border-color:rgba(255,255,255,.14)}
-  .btn-danger{background:var(--danger);border-color:transparent}
+  .btn-primary{background:var(--primary);border-color:transparent;font-weight:600;color:white}
+  .btn-ghost{background:transparent;border-color:var(--border)}
+  .btn-danger{background:var(--danger);border-color:transparent;color:white}
   .panel{
-    background:var(--card);border:1px solid rgba(255,255,255,.06);
-    border-radius:14px;padding:12px;margin:12px 0
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:14px;padding:12px;margin:12px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
   .toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:space-between}
   .legend{display:flex;gap:8px;flex-wrap:wrap;font-size:0.8em;}
-  .chip{padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.08);font-size:11px}
+  .chip{padding:4px 8px;border-radius:8px;border:1px solid var(--border);font-size:11px}
   .chip.ok{background:rgba(16,185,129,.12)}
   .chip.warn{background:rgba(245,158,11,.12)}
   .chip.err{background:rgba(239,68,68,.12)}
   .chip.vacation{background:rgba(139,92,246,.12)}
+  .chip.esp{background:rgba(168,85,247,.12)}
 
   .calendar{
-    width:100%;overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.06);
+    width:100%;overflow:auto;border-radius:12px;border:1px solid var(--border);
     max-height:70vh;
   }
 
   table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
-  th, td { border: 1px solid #333; padding: 4px; text-align: center; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; }
+  th, td { border: 1px solid var(--border); padding: 4px; text-align: center; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; }
 
   thead th{
-    position:sticky;top:0;background:#0c1324;z-index:5;
+    position:sticky;top:0;background:#f8fafc;z-index:5;
     padding:6px 4px;font-weight:600;white-space:nowrap;
   }
 
   /* Primeira coluna: ajuste automático + sticky */
   tbody th {
-    position:sticky;left:0;background:#0c1324;text-align:left;font-weight:600;
-    border-right:1px solid rgba(255,255,255,.06);z-index:4;
+    position:sticky;left:0;background:#f8fafc;text-align:left;font-weight:600;
+    border-right:1px solid var(--border);z-index:4;
     width:auto; max-width:none; white-space:nowrap; padding:4px 8px;
   }
 
@@ -82,44 +86,32 @@
   tr.magenta-row th, tr.magenta-row td { background: var(--magenta-light); }
   tr.blue-row   th, tr.blue-row   td { background: var(--cornflower-light); }
 
-  /* Domingo: coluna inteira cinza escuro */
-  th.sun, td.sun { background: var(--dark-gray) !important; color: white; }
+  /* Domingo: coluna inteira cinza claro */
+  th.sun, td.sun { background: var(--light-gray) !important; }
 
   /* Sábado dinâmico por valor */
   td.sat-d, td.sat-off { background: var(--danger) !important; color: #fff !important; font-weight:700; }
-  td.sat-f            { background: var(--primary) !important; color: #fff !important; font-weight:700; }
+  td.sat-t            { background: var(--primary) !important; color: #fff !important; font-weight:700; }
 
   /* Férias - cor roxa */
   td.vacation { background: var(--vacation) !important; color: #fff !important; font-weight:700; }
 
+  /* Especial - cor magenta */
+  td.esp { background: #d946ef !important; color: #fff !important; font-weight:700; }
+
   /* Separação de semanas – bordas grossas: esquerda da segunda / direita do sábado */
-  th.mon-start, td.mon-start { border-left: 3px solid #fff; }
-  th.sat-end,  td.sat-end  { border-right: 3px solid #fff; }
+  th.mon-start, td.mon-start { border-left: 3px solid var(--border); }
+  th.sat-end,  td.sat-end  { border-right: 3px solid var(--border); }
 
   /* Editor popup */
   .cell-editor{
-    position:absolute;background:#0f1a30;border:1px solid rgba(255,255,255,.18);
-    border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.4);padding:5px;z-index:50;font-size:0.9em;
+    position:absolute;background:white;border:1px solid var(--border);
+    border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:5px;z-index:50;font-size:0.9em;
   }
   .cell-editor select{width:110px;font-size:0.9em;}
   .hidden{display:none}
   .muted{color:var(--muted)}
   
-  /* Fonte preta nos nomes */
-  tbody th {
-    color: black !important;
-  }
-
-  /* Fonte preta em todas as células por padrão */
-  tbody td {
-    color: black;
-  }
-
-  /* Mantém exceções de sábado já existentes */
-  td.sat-d, td.sat-off, td.sat-f, td.vacation {
-    color: white !important;
-  }
-
   /* Novo layout para os botões de navegação */
   .month-navigation {
     display: flex;
@@ -132,6 +124,49 @@
     text-align: center;
     font-size: 1.2em;
     font-weight: bold;
+  }
+  
+  /* Observações */
+  .observations {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  
+  .observations textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  
+  .observations.readonly {
+    background: #f8fafc;
+  }
+  
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8em;
+  }
+  
+  .color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
   }
 </style>
 </head>
@@ -161,9 +196,10 @@
     </div>
     <div class="legend">
       <div class="chip ok">Seg–Sex: A/B/C</div>
-      <div class="chip warn">Sáb: D (F alterna)</div>
-      <div class="chip err">Dom: OFF</div>
+      <div class="chip warn">Sáb: D (T alterna)</div>
+      <div class="chip err">Dom: Vazio</div>
       <div class="chip vacation">*** = Férias</div>
+      <div class="chip esp">ESP = Especial</div>
     </div>
     <div class="right">
       <button id="generateBtn" class="btn-primary hidden">Gerar próximo mês</button>
@@ -171,7 +207,7 @@
   </div>
 
   <div class="panel">
-    <div class="muted" style="font-size:12px">Clique em uma célula para editar (somente admin). Valores: <b>A, B, C, D, F, OFF, ***</b>.</div>
+    <div class="muted" style="font-size:12px">Clique em uma célula para editar (somente admin). Valores: <b>A, B, C, D, T, OFF, ***, ESP</b>.</div>
     <div class="calendar">
       <table id="scheduleTable">
         <thead id="thead"></thead>
@@ -180,7 +216,24 @@
     </div>
   </div>
 
-  <div class="muted" style="text-align:center;font-size:12px">A = 8h às 12h; 13h às 17h | B = 8h às 13h; 14h às 17h | C = 8h às 12h30; 13h30 às 17h | D = 8h às 12h | F = 14h às 18h | *** = Férias</div>
+  <div class="legend-grid">
+    <div class="legend-item"><div class="color-box" style="background:#10b981"></div> A = 8h às 12h - 13h às 17h</div>
+    <div class="legend-item"><div class="color-box" style="background:#f59e0b"></div> B = 8h às 13h - 14h às 17h</div>
+    <div class="legend-item"><div class="color-box" style="background:#3b82f6"></div> C = 8h às 12h30 - 13h30 às 17h</div>
+    <div class="legend-item"><div class="color-box" style="background:#ef4444"></div> D = 8h às 12h (Sábado)</div>
+    <div class="legend-item"><div class="color-box" style="background:#3b82f6"></div> T = 14h às 18h (Sábado)</div>
+    <div class="legend-item"><div class="color-box" style="background:#8b5cf6"></div> *** = Férias</div>
+    <div class="legend-item"><div class="color-box" style="background:#d946ef"></div> ESP = Especial</div>
+    <div class="legend-item"><div class="color-box" style="background:#e2e8f0"></div> OFF = Folga</div>
+  </div>
+
+  <div class="observations" id="observationsContainer">
+    <h3>Observações</h3>
+    <textarea id="observationsText" placeholder="Adicione observações sobre a escala aqui..."></textarea>
+    <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+      <button id="saveObservations" class="btn-primary hidden">Salvar Observações</button>
+    </div>
+  </div>
 </main>
 
 <!-- Firebase SDKs -->
@@ -228,6 +281,7 @@ const ADMIN_EMAIL = "bioranss@gmail.com";
 let currentUser=null, isAdmin=false;
 let viewYear, viewMonth;
 let dataCache = {};  // dados do mês corrente
+let observationsCache = ""; // observações do mês
 
 /* ====================== UTILS ====================== */
 const pad2 = n => String(n).padStart(2,'0');
@@ -277,6 +331,20 @@ auth.onAuthStateChanged(async (user)=>{
   passEl.classList.toggle('hidden',  !!user);
   roleBadge.textContent = isAdmin ? "Admin" : (user ? "Somente leitura" : "Somente leitura");
   document.getElementById('generateBtn').classList.toggle('hidden', !isAdmin);
+  document.getElementById('saveObservations').classList.toggle('hidden', !isAdmin);
+  
+  // Atualizar estado do campo de observações
+  const obsText = document.getElementById('observationsText');
+  const obsContainer = document.getElementById('observationsContainer');
+  
+  if (isAdmin) {
+    obsText.readOnly = false;
+    obsContainer.classList.remove('readonly');
+  } else {
+    obsText.readOnly = true;
+    obsContainer.classList.add('readonly');
+  }
+  
   // Apenas re-render para aplicar permissões (não precisa recarregar do DB)
   renderTable(viewYear, viewMonth, dataCache);
 });
@@ -301,6 +369,13 @@ async function loadMonth(y,m){
   const ref = db.ref(`schedules/${y}/${pad2(m+1)}`);
   const snap = await ref.get();
   dataCache = snap.exists() ? snap.val() : {};
+  
+  // Carregar observações
+  const obsRef = db.ref(`observations/${y}/${pad2(m+1)}`);
+  const obsSnap = await obsRef.get();
+  observationsCache = obsSnap.exists() ? obsSnap.val() : "";
+  document.getElementById('observationsText').value = observationsCache;
+  
   renderTable(y,m,dataCache);
 }
 
@@ -337,10 +412,12 @@ function renderTable(y,m, monthData){
       if(dow===SUNDAY) cls = "sun";
       if(dow===SATURDAY){
         if(val==="D" || val==="OFF") cls = "sat-d";
-        else if(val==="F") cls = "sat-f";
+        else if(val==="T") cls = "sat-t";
         else if(val==="***") cls = "vacation";
+        else if(val==="ESP") cls = "esp";
       } else {
         if(val==="***") cls = "vacation";
+        else if(val==="ESP") cls = "esp";
       }
       if(dow===1) cls = (cls?cls+" ":"") + "mon-start";
       if(dow===6) cls = (cls?cls+" ":"") + "sat-end";
@@ -374,9 +451,9 @@ function enableCellEditing(){
       editorEl.style.top = (window.scrollY + r.top + r.height + 4)+'px';
       editorEl.style.left = (window.scrollX + r.left)+'px';
       const dow = Number(td.dataset.dow);
-      let opts = ['A','B','C','OFF','***'];
-      if(dow===SATURDAY) opts = ['D','F','OFF','***'];
-      if(dow===SUNDAY)  opts = ['OFF','***'];
+      let opts = ['A','B','C','OFF','***','ESP'];
+      if(dow===SATURDAY) opts = ['D','T','OFF','***','ESP'];
+      if(dow===SUNDAY)  opts = ['OFF','***','ESP'];
       const current = td.textContent.trim();
       editorEl.innerHTML = `
         <select id="opt">${opts.map(o=>`<option value="${o}" ${o===current?'selected':''}>${o}</option>`).join('')}</select>
@@ -404,8 +481,8 @@ async function saveCell(td, value){
   dataCache[day] = dataCache[day] || {};
   dataCache[day][id] = value;
 
-  // Ajuste de OFF em grupos apenas Seg–Sex (não aplica para férias "***")
-  if(dow!==SATURDAY && dow!==SUNDAY && value !== "***"){
+  // Ajuste de OFF em grupos apenas Seg–Sex (não aplica para férias "***" ou "ESP")
+  if(dow!==SATURDAY && dow!==SUNDAY && value !== "***" && value !== "ESP"){
     for(const group of [GROUPS.G1, GROUPS.G2]){
       if(group.includes(id)) applyOffShift(group, dataCache[day]);
     }
@@ -417,6 +494,21 @@ async function saveCell(td, value){
   // Re-render
   renderTable(viewYear, viewMonth, dataCache);
 }
+
+/* ====================== OBSERVAÇÕES ====================== */
+document.getElementById('saveObservations').addEventListener('click', async () => {
+  if(!isAdmin) return;
+  
+  const newObservations = document.getElementById('observationsText').value;
+  
+  try {
+    await db.ref(`observations/${viewYear}/${pad2(viewMonth+1)}`).set(newObservations);
+    observationsCache = newObservations;
+    alert("Observações salvas com sucesso!");
+  } catch (error) {
+    alert("Erro ao salvar observações: " + error.message);
+  }
+});
 
 /* ====================== GERADOR DE MÊS (ADMIN) ====================== */
 document.getElementById('generateBtn').addEventListener('click', async ()=>{
@@ -467,8 +559,8 @@ async function getLastSchedule(y, m, employeeId) {
   return null;
 }
 
-// Função para obter quem fez o último horário F no mês anterior
-async function getLastFSaturday(y, m) {
+// Função para obter quem fez o último horário T no mês anterior
+async function getLastTSaturday(y, m) {
   const prevMonth = new Date(y, m, 1);
   prevMonth.setMonth(prevMonth.getMonth() - 1);
   
@@ -490,7 +582,7 @@ async function getLastFSaturday(y, m) {
     
     if (dow === SATURDAY && monthData[dayStr]) {
       for (const id of Object.keys(monthData[dayStr])) {
-        if (monthData[dayStr][id] === "F") {
+        if (monthData[dayStr][id] === "T") {
           return id;
         }
       }
@@ -521,8 +613,8 @@ async function generateMonth(y,m){
     eduarda: await getLastSchedule(y, m, "eduarda")
   };
   
-  // Obter quem fez o último horário F
-  const lastFSaturday = await getLastFSaturday(y, m);
+  // Obter quem fez o último horário T
+  const lastTSaturday = await getLastTSaturday(y, m);
   
   const payload = {};
   
@@ -545,12 +637,12 @@ async function generateMonth(y,m){
     }
   }
   
-  // Determinar início da rotação de sábados F
-  let satFStart = 0; // 0 = Isabela, 1 = Eduarda
-  if (lastFSaturday === "isabela") {
-    satFStart = 1; // Próximo será Eduarda
-  } else if (lastFSaturday === "eduarda") {
-    satFStart = 0; // Próximo será Isabela
+  // Determinar início da rotação de sábados T
+  let satTStart = 0; // 0 = Isabela, 1 = Eduarda
+  if (lastTSaturday === "isabela") {
+    satTStart = 1; // Próximo será Eduarda
+  } else if (lastTSaturday === "eduarda") {
+    satTStart = 0; // Próximo será Isabela
   }
   
   for(let d=1; d<=days; d++){
@@ -559,7 +651,7 @@ async function generateMonth(y,m){
     payload[key] = {};
 
     if(dow===SUNDAY){
-      for(const id of Object.keys(EMPLOYEES)) payload[key][id] = "OFF";
+      // Domingo fica vazio por padrão
       continue;
     }
     
@@ -568,18 +660,18 @@ async function generateMonth(y,m){
       
       const satIdx = saturdayIndexInMonth(y,m,d);
       
-      // Alternar quem faz F, começando pela posição determinada
+      // Alternar quem faz T, começando pela posição determinada
       if (satIdx % 2 === 0) {
-        if (satFStart === 0) {
-          payload[key]["isabela"] = "F";
+        if (satTStart === 0) {
+          payload[key]["isabela"] = "T";
         } else {
-          payload[key]["eduarda"] = "F";
+          payload[key]["eduarda"] = "T";
         }
       } else {
-        if (satFStart === 0) {
-          payload[key]["eduarda"] = "F";
+        if (satTStart === 0) {
+          payload[key]["eduarda"] = "T";
         } else {
-          payload[key]["isabela"] = "F";
+          payload[key]["isabela"] = "T";
         }
       }
       continue;
